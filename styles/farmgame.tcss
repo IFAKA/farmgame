@@ -139,6 +139,7 @@ Screen {
 
 /* Seed selector modal */
 #seed-selector {
+    align: center middle;
     width: 60;
     height: auto;
     max-height: 30;
@@ -181,6 +182,7 @@ Screen {
 
 /* Offline summary modal */
 #offline-summary {
+    align: center middle;
     width: 70;
     height: auto;
     max-height: 35;
