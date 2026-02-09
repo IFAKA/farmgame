@@ -145,12 +145,9 @@ Screen {
     align: center middle;
     width: 50;
     height: auto;
-    max-height: 80%;
-    background: #2a2a2a;
-    border: thick #4a90e2;
-    padding: 2;
-    overflow-y: auto;
-    margin: 0;
+    background: $surface;
+    border: thick $primary;
+    padding: 1 2;
 }
 
 #seed-selector-title {
@@ -170,23 +167,11 @@ Screen {
 
 .seed-option {
     width: 100%;
-    height: 1;
-    border: solid #444;
-    padding: 0 1;
     margin: 0 0 1 0;
-    color: #ffffff;
-}
-
-.seed-option:hover {
-    border: solid #4a90e2;
-    background: #1a1a1a;
-    color: #ffffff;
 }
 
 .seed-option:focus {
     border: double #4a90e2;
-    background: #1a1a2a;
-    color: #ffffff;
 }
 
 .seed-option-locked {
@@ -199,12 +184,9 @@ Screen {
     align: center middle;
     width: 60;
     height: auto;
-    max-height: 80%;
-    background: #2a2a2a;
-    border: thick #5cb85c;
-    padding: 2;
-    overflow-y: auto;
-    margin: 0;
+    background: $surface;
+    border: thick $success;
+    padding: 1 2;
 }
 
 #offline-title {
@@ -233,34 +215,9 @@ Screen {
 /* Buttons */
 Button {
     min-width: 16;
-    height: 1;
     margin: 1 0;
-    color: #ffffff;
-    background: #333333;
-}
-
-Button:hover {
-    background: #4a90e2;
-    color: #ffffff;
 }
 
 Button:focus {
     border: double #4a90e2;
-    background: #1a1a2a;
-    color: #ffffff;
-}
-
-Button.primary {
-    background: #4a90e2;
-    color: #ffffff;
-}
-
-Button.success {
-    background: #5cb85c;
-    color: #ffffff;
-}
-
-Button.danger {
-    background: #ff6b6b;
-    color: #ffffff;
 }
