@@ -3,7 +3,7 @@
 
 import asyncio
 from textual.app import App, ComposeResult
-from textual.containers import Container, Vertical, Horizontal
+from textual.containers import Container, Vertical, Horizontal, Center, Middle
 from textual.widgets import Static, Button, Header, Footer
 from textual.reactive import reactive
 from textual.binding import Binding
@@ -42,26 +42,29 @@ class SeedSelector(Container):
 
     def compose(self) -> ComposeResult:
         """Create seed selector content."""
-        yield Static("🌱 Select Seed to Plant", id="seed-selector-title")
+        with Center():
+            with Middle():
+                with Vertical(id="seed-content"):
+                    yield Static("🌱 Select Seed to Plant", id="seed-selector-title")
 
-        with Vertical(id="seed-list"):
-            for crop_type, config in CROPS.items():
-                if config.unlock_level > self.player.level:
-                    # Locked crop
-                    yield Static(
-                        f"[dim]{config.emoji} {config.name} - 🔒 Level {config.unlock_level}[/dim]",
-                        classes="seed-option seed-option-locked"
-                    )
-                else:
-                    can_afford = self.player.coins >= config.seed_cost
-                    color = "green" if can_afford else "red"
-                    yield Button(
-                        f"{config.emoji} {config.name} - {config.seed_cost}💰 ({config.growth_time}s)",
-                        id=f"seed-{crop_type}",
-                        classes="seed-option"
-                    )
+                    with Vertical(id="seed-list"):
+                        for crop_type, config in CROPS.items():
+                            if config.unlock_level > self.player.level:
+                                # Locked crop
+                                yield Static(
+                                    f"[dim]{config.emoji} {config.name} - 🔒 Level {config.unlock_level}[/dim]",
+                                    classes="seed-option seed-option-locked"
+                                )
+                            else:
+                                can_afford = self.player.coins >= config.seed_cost
+                                color = "green" if can_afford else "red"
+                                yield Button(
+                                    f"{config.emoji} {config.name} - {config.seed_cost}💰 ({config.growth_time}s)",
+                                    id=f"seed-{crop_type}",
+                                    classes="seed-option"
+                                )
 
-        yield Button("Cancel", id="seed-cancel", variant="error")
+                    yield Button("Cancel", id="seed-cancel", variant="error")
 
     async def on_mount(self) -> None:
         """Focus first button when mounted."""
@@ -137,25 +140,28 @@ class OfflineSummary(Container):
 
     def compose(self) -> ComposeResult:
         """Create offline summary content."""
-        yield Static("🌙 Welcome Back!", id="offline-title")
+        with Center():
+            with Middle():
+                with Vertical(id="offline-content-container"):
+                    yield Static("🌙 Welcome Back!", id="offline-title")
 
-        # Format offline time
-        hours = int(self.summary['offline_time'] // 3600)
-        minutes = int((self.summary['offline_time'] % 3600) // 60)
-        time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+                    # Format offline time
+                    hours = int(self.summary['offline_time'] // 3600)
+                    minutes = int((self.summary['offline_time'] % 3600) // 60)
+                    time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
 
-        content = f"[bold]You were away for {time_str}[/bold]\n\n"
+                    content = f"[bold]You were away for {time_str}[/bold]\n\n"
 
-        if self.summary['auto_harvested']:
-            content += "[green]Auto-harvested crops (70% value):[/green]\n"
-            for crop_name, coins in self.summary['auto_harvested']:
-                content += f"  • {crop_name}: +{coins}💰\n"
-            content += f"\n[bold green]Total earned: {self.summary['total_coins']}💰[/bold green]"
-        else:
-            content += "[dim]No crops were ready to harvest.[/dim]"
+                    if self.summary['auto_harvested']:
+                        content += "[green]Auto-harvested crops (70% value):[/green]\n"
+                        for crop_name, coins in self.summary['auto_harvested']:
+                            content += f"  • {crop_name}: +{coins}💰\n"
+                        content += f"\n[bold green]Total earned: {self.summary['total_coins']}💰[/bold green]"
+                    else:
+                        content += "[dim]No crops were ready to harvest.[/dim]"
 
-        yield Static(content, id="offline-content")
-        yield Static("[dim]Press Escape, Enter, or Space to continue[/dim]", id="offline-footer")
+                    yield Static(content, id="offline-content")
+                    yield Static("[dim]Press Escape, Enter, or Space to continue[/dim]", id="offline-footer")
 
     async def on_mount(self) -> None:
         """Focus modal when mounted to capture keyboard input."""
@@ -378,9 +384,13 @@ class FarmGame(App):
         def on_select(crop_type: str):
             self.app.call_later(self._plant_crop, x, y, crop_type)
             selector.remove()
+            # Restore focus to the plot after closing modal
+            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
 
         def on_cancel():
             selector.remove()
+            # Restore focus to the plot after closing modal
+            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
 
         selector = SeedSelector(self.player, on_select, on_cancel)
         await self.mount(selector)
@@ -461,6 +471,9 @@ class FarmGame(App):
 
         def on_close():
             modal.remove()
+            # Restore focus to the current plot
+            x, y = self.focused_plot
+            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
 
         modal = OfflineSummary(summary, on_close)
         await self.mount(modal)
