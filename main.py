@@ -30,6 +30,8 @@ class SeedSelector(Container):
         Binding("down", "focus_next", "Next", priority=True, show=False),
         Binding("k", "focus_previous", "Previous", priority=True, show=False),
         Binding("j", "focus_next", "Next", priority=True, show=False),
+        Binding("tab", "focus_next", "Next", priority=True, show=False),
+        Binding("shift+tab", "focus_previous", "Previous", priority=True, show=False),
     ]
 
     def __init__(self, player: Player, on_select, on_cancel):
@@ -75,12 +77,38 @@ class SeedSelector(Container):
         self.on_cancel()
 
     def action_focus_previous(self) -> None:
-        """Focus previous button."""
-        self.screen.focus_previous()
+        """Focus previous button, cycling within modal."""
+        buttons = list(self.query("Button"))
+        if not buttons:
+            return
+
+        # Find currently focused button
+        focused = self.screen.focused
+        if focused in buttons:
+            current_idx = buttons.index(focused)
+            # Cycle to previous (or wrap to last)
+            prev_idx = (current_idx - 1) % len(buttons)
+            buttons[prev_idx].focus()
+        else:
+            # No button focused, focus first
+            buttons[0].focus()
 
     def action_focus_next(self) -> None:
-        """Focus next button."""
-        self.screen.focus_next()
+        """Focus next button, cycling within modal."""
+        buttons = list(self.query("Button"))
+        if not buttons:
+            return
+
+        # Find currently focused button
+        focused = self.screen.focused
+        if focused in buttons:
+            current_idx = buttons.index(focused)
+            # Cycle to next (or wrap to first)
+            next_idx = (current_idx + 1) % len(buttons)
+            buttons[next_idx].focus()
+        else:
+            # No button focused, focus first
+            buttons[0].focus()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
