@@ -1,0 +1,236 @@
+/* TUI Farming Game Styles */
+
+/* Main app layout */
+Screen {
+    background: #1a1a1a;
+}
+
+#main-container {
+    layout: horizontal;
+    height: 100%;
+    width: 100%;
+}
+
+/* Farm grid container */
+#farm-container {
+    width: 3fr;
+    height: 100%;
+    padding: 1;
+}
+
+#farm-grid {
+    width: 100%;
+    height: 100%;
+    grid-gutter: 1;
+}
+
+/* Individual plots */
+.plot {
+    width: 100%;
+    height: 100%;
+    content-align: center middle;
+    text-align: center;
+    border: solid #444;
+    padding: 1;
+}
+
+.plot:hover {
+    border: solid #ff6b6b;
+}
+
+.plot:focus {
+    border: double #4a90e2;
+    background: #1a1a2a;
+}
+
+.plot.empty {
+    border: solid #444;
+    background: #0a0a0a;
+}
+
+.plot.empty:focus {
+    border: double #4a90e2;
+    background: #0a0a1a;
+}
+
+.plot.growing {
+    border: solid #f0ad4e;
+    background: #1a1208;
+}
+
+.plot.growing:focus {
+    border: double #4a90e2;
+    background: #1a1a28;
+}
+
+.plot.ready {
+    border: solid #5cb85c;
+    background: #081a08;
+}
+
+.plot.ready:focus {
+    border: double #4a90e2;
+    background: #0a1a1a;
+}
+
+/* Sidebar */
+#sidebar {
+    width: 1fr;
+    min-width: 30;
+    height: 100%;
+    background: #0a0a0a;
+    border-left: solid #444;
+    padding: 2;
+}
+
+#stats-display {
+    width: 100%;
+    height: auto;
+}
+
+/* Shop screen */
+#shop-container {
+    width: 100%;
+    height: 100%;
+    padding: 2;
+    background: #1a1a1a;
+}
+
+#shop-title {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    text-align: center;
+    text-style: bold;
+    color: #4a90e2;
+    margin-bottom: 1;
+}
+
+#shop-grid {
+    width: 100%;
+    height: auto;
+    grid-size: 2;
+    grid-gutter: 1 2;
+    margin-bottom: 2;
+}
+
+.shop-item {
+    width: 100%;
+    height: auto;
+    border: solid #444;
+    padding: 1;
+}
+
+.shop-item:hover {
+    border: solid #4a90e2;
+}
+
+.shop-item-locked {
+    opacity: 0.5;
+}
+
+#shop-footer {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    text-align: center;
+    color: #888;
+}
+
+/* Seed selector modal */
+#seed-selector {
+    width: 60;
+    height: auto;
+    max-height: 30;
+    background: #2a2a2a;
+    border: thick #4a90e2;
+    padding: 2;
+}
+
+#seed-selector-title {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    text-align: center;
+    text-style: bold;
+    color: #4a90e2;
+    margin-bottom: 1;
+}
+
+#seed-list {
+    width: 100%;
+    height: auto;
+}
+
+.seed-option {
+    width: 100%;
+    height: 3;
+    border: solid #444;
+    padding: 0 1;
+    margin: 0 0 1 0;
+}
+
+.seed-option:hover {
+    border: solid #4a90e2;
+    background: #1a1a1a;
+}
+
+.seed-option-locked {
+    opacity: 0.5;
+}
+
+/* Offline summary modal */
+#offline-summary {
+    width: 70;
+    height: auto;
+    max-height: 35;
+    background: #2a2a2a;
+    border: thick #5cb85c;
+    padding: 2;
+}
+
+#offline-title {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    text-align: center;
+    text-style: bold;
+    color: #5cb85c;
+    margin-bottom: 1;
+}
+
+#offline-content {
+    width: 100%;
+    height: auto;
+    overflow-y: auto;
+}
+
+#offline-footer {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    text-align: center;
+    margin-top: 1;
+}
+
+/* Buttons */
+Button {
+    min-width: 16;
+    margin: 1;
+}
+
+Button:hover {
+    background: #4a90e2;
+}
+
+Button.primary {
+    background: #4a90e2;
+}
+
+Button.success {
+    background: #5cb85c;
+}
+
+Button.danger {
+    background: #ff6b6b;
+}
