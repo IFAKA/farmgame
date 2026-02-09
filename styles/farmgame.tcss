@@ -144,6 +144,12 @@ Screen {
     layer: overlay;
     width: 100%;
     height: 100%;
+    background: transparent;
+}
+
+#seed-selector Center,
+#seed-selector Middle {
+    background: transparent;
 }
 
 #seed-content {
@@ -187,6 +193,12 @@ Screen {
     layer: overlay;
     width: 100%;
     height: 100%;
+    background: transparent;
+}
+
+#offline-summary Center,
+#offline-summary Middle {
+    background: transparent;
 }
 
 #offline-content-container {
