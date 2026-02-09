@@ -143,9 +143,6 @@ Screen {
 #seed-selector {
     layer: overlay;
     align: center middle;
-}
-
-#seed-modal-content {
     width: 50;
     height: auto;
     background: $surface;
@@ -185,9 +182,6 @@ Screen {
 #offline-summary {
     layer: overlay;
     align: center middle;
-}
-
-#offline-modal-content {
     width: 60;
     height: auto;
     background: $surface;
