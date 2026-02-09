@@ -6,7 +6,7 @@ ADHD-friendly terminal farming game. Quick dopamine hits, zero commitment.
 
 ### Install
 ```bash
-pipx install git+https://github.com/YOURUSERNAME/farmgame.git
+pipx install git+https://github.com/IFAKA/farmgame.git
 ```
 
 ### Play
@@ -88,7 +88,7 @@ Offline crops auto-harvest at 70% value (capped at 24 hours).
 
 ```bash
 # Clone and install in editable mode
-git clone https://github.com/YOURUSERNAME/farmgame.git
+git clone https://github.com/IFAKA/farmgame.git
 cd farmgame
 pipx install -e .
 
