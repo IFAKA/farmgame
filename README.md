@@ -1,6 +1,32 @@
 # 🌱 TUI Farm Game
 
-A casual farming game for your terminal! Perfect for idle time while waiting for things to load.
+ADHD-friendly terminal farming game. Quick dopamine hits, zero commitment.
+
+## Three Commands You Need
+
+### Install
+```bash
+pipx install git+https://github.com/YOURUSERNAME/farmgame.git
+```
+
+### Play
+```bash
+farm
+```
+
+### Uninstall (no traces)
+```bash
+pipx uninstall farmgame && rm -rf ~/.farmgame
+```
+
+---
+
+## Don't have pipx?
+```bash
+brew install pipx
+```
+
+---
 
 ## Features
 
@@ -10,35 +36,6 @@ A casual farming game for your terminal! Perfect for idle time while waiting for
 - 💾 **Auto-Save**: Game saves automatically every 30 seconds
 - 🌙 **Offline Progress**: Crops auto-harvest when you're away (70% value)
 - 🎨 **Visual Feedback**: Color-coded plots, progress bars, and emojis
-
-## Installation
-
-**ONE COMMAND - Play from anywhere:**
-```bash
-pipx install git+https://github.com/YOURUSERNAME/farmgame.git
-```
-
-Don't have pipx? Install it first:
-```bash
-brew install pipx
-```
-
-## Usage
-
-Just type from ANYWHERE:
-```bash
-farm
-```
-
-That's it! 🎮
-
-## Uninstall (Zero Traces)
-
-```bash
-pipx uninstall farmgame && rm -rf ~/.farmgame
-```
-
-Done. Game + saves completely gone.
 
 ## How to Play
 
