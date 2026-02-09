@@ -16,11 +16,12 @@ Screen {
     width: 3fr;
     height: 100%;
     padding: 1;
+    overflow: auto;
 }
 
 #farm-grid {
     width: 100%;
-    height: 100%;
+    height: auto;
     grid-gutter: 1;
 }
 
@@ -81,6 +82,7 @@ Screen {
     background: #0a0a0a;
     border-left: solid #444;
     padding: 2;
+    overflow-y: auto;
 }
 
 #stats-display {
@@ -139,13 +141,15 @@ Screen {
 
 /* Seed selector modal */
 #seed-selector {
+    layer: overlay;
     align: center middle;
-    width: 60;
+    width: 50;
     height: auto;
-    max-height: 30;
+    max-height: 80%;
     background: #2a2a2a;
     border: thick #4a90e2;
-    padding: 2;
+    padding: 1;
+    overflow-y: auto;
 }
 
 #seed-selector-title {
@@ -165,15 +169,20 @@ Screen {
 
 .seed-option {
     width: 100%;
-    height: 3;
+    height: 1;
     border: solid #444;
     padding: 0 1;
-    margin: 0 0 1 0;
+    margin: 0;
 }
 
 .seed-option:hover {
     border: solid #4a90e2;
     background: #1a1a1a;
+}
+
+.seed-option:focus {
+    border: double #4a90e2;
+    background: #1a1a2a;
 }
 
 .seed-option-locked {
@@ -182,13 +191,15 @@ Screen {
 
 /* Offline summary modal */
 #offline-summary {
+    layer: overlay;
     align: center middle;
-    width: 70;
+    width: 60;
     height: auto;
-    max-height: 35;
+    max-height: 80%;
     background: #2a2a2a;
     border: thick #5cb85c;
-    padding: 2;
+    padding: 1;
+    overflow-y: auto;
 }
 
 #offline-title {
@@ -204,7 +215,6 @@ Screen {
 #offline-content {
     width: 100%;
     height: auto;
-    overflow-y: auto;
 }
 
 #offline-footer {
@@ -218,11 +228,17 @@ Screen {
 /* Buttons */
 Button {
     min-width: 16;
-    margin: 1;
+    height: 1;
+    margin: 0;
 }
 
 Button:hover {
     background: #4a90e2;
+}
+
+Button:focus {
+    border: double #4a90e2;
+    background: #1a1a2a;
 }
 
 Button.primary {

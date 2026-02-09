@@ -24,6 +24,14 @@ from config import (
 class SeedSelector(Container):
     """Modal for selecting seeds to plant."""
 
+    BINDINGS = [
+        Binding("escape", "cancel", "Cancel", priority=True, show=False),
+        Binding("up", "focus_previous", "Previous", priority=True, show=False),
+        Binding("down", "focus_next", "Next", priority=True, show=False),
+        Binding("k", "focus_previous", "Previous", priority=True, show=False),
+        Binding("j", "focus_next", "Next", priority=True, show=False),
+    ]
+
     def __init__(self, player: Player, on_select, on_cancel):
         super().__init__(id="seed-selector")
         self.player = player
@@ -55,17 +63,24 @@ class SeedSelector(Container):
 
     async def on_mount(self) -> None:
         """Focus first button when mounted."""
-        # Find first seed button and focus it
+        # Prevent focus from going to elements behind the modal
+        self.can_focus = True
+        # Focus the first button
         buttons = self.query("Button")
         if buttons:
             buttons.first().focus()
 
-    async def on_key(self, event) -> None:
-        """Handle keyboard input."""
-        if event.key == "escape":
-            self.on_cancel()
-            event.prevent_default()
-            event.stop()
+    def action_cancel(self) -> None:
+        """Handle cancel action."""
+        self.on_cancel()
+
+    def action_focus_previous(self) -> None:
+        """Focus previous button."""
+        self.screen.focus_previous()
+
+    def action_focus_next(self) -> None:
+        """Focus next button."""
+        self.screen.focus_next()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
@@ -80,6 +95,12 @@ class SeedSelector(Container):
 
 class OfflineSummary(Container):
     """Modal showing offline progression summary."""
+
+    BINDINGS = [
+        Binding("escape", "close", "Close", priority=True, show=False),
+        Binding("enter", "close", "Close", priority=True, show=False),
+        Binding("space", "close", "Close", priority=True, show=False),
+    ]
 
     def __init__(self, summary: dict, on_close):
         super().__init__(id="offline-summary")
@@ -106,13 +127,24 @@ class OfflineSummary(Container):
             content += "[dim]No crops were ready to harvest.[/dim]"
 
         yield Static(content, id="offline-content")
-        yield Static("[dim]Press any key to continue[/dim]", id="offline-footer")
+        yield Static("[dim]Press Escape, Enter, or Space to continue[/dim]", id="offline-footer")
+
+    async def on_mount(self) -> None:
+        """Focus modal when mounted to capture keyboard input."""
+        self.can_focus = True
+        self.focus()
+
+    def action_close(self) -> None:
+        """Handle close action."""
+        self.on_close()
 
     async def on_key(self, event) -> None:
-        """Close on any key press."""
-        self.on_close()
-        event.prevent_default()
-        event.stop()
+        """Close on any key press (fallback for other keys)."""
+        # Allow specific keys through bindings, but also accept any other key
+        if event.key not in ["escape", "enter", "space"]:
+            self.on_close()
+            event.prevent_default()
+            event.stop()
 
 
 class FarmGame(App):
@@ -172,9 +204,13 @@ class FarmGame(App):
         if save_data:
             self.farm, self.player, offline_summary = save_data
 
-            # Show offline summary if significant
-            if offline_summary['offline_time'] > 10:
+            # Show offline summary if significant (>5 min OR crops were harvested)
+            if offline_summary['offline_time'] > 300 or offline_summary['auto_harvested']:
                 await self._show_offline_summary(offline_summary)
+            elif offline_summary['offline_time'] > 60:
+                # Short offline time - just show a toast
+                minutes = int(offline_summary['offline_time'] // 60)
+                self.notify(f"🌙 Welcome back! You were away for {minutes}m", timeout=3)
         else:
             self.farm, self.player = SaveSystem.create_new_game()
             self.notify("🌱 Welcome to TUI Farm! Plant your first crop!", severity="information", timeout=5)
