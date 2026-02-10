@@ -2,12 +2,15 @@
 """TUI Farming Game - Main application."""
 
 import asyncio
+import logging
+from typing import Optional, Callable, Tuple
 from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical, Horizontal, VerticalScroll
 from textual.widgets import Static, Button, Header, Footer
 from textual.reactive import reactive
 from textual.binding import Binding
 from textual import work
+from textual.css.query import NoMatches
 
 from models.farm import Farm
 from models.player import Player
@@ -17,8 +20,12 @@ from widgets.sidebar import Sidebar
 from widgets.plot import PlotClicked
 from config import (
     AUTO_SAVE_INTERVAL, GROWTH_UPDATE_INTERVAL, CROPS,
-    XP_PER_HARVEST
+    XP_PER_HARVEST, MODAL_CLOSE_DELAY, PLOT_FOCUS_DELAY,
+    MODAL_ANIMATION_DELAY, MIN_OFFLINE_TIME_FOR_TOAST,
+    MIN_OFFLINE_TIME_FOR_MODAL
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SeedSelector(Container):
@@ -203,15 +210,15 @@ class FarmGame(App):
     level = reactive(1)
     experience = reactive(0)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.farm: Farm = None
-        self.player: Player = None
-        self.farm_grid: FarmGrid = None
-        self.sidebar: Sidebar = None
+        self.farm: Optional[Farm] = None
+        self.player: Optional[Player] = None
+        self.farm_grid: Optional[FarmGrid] = None
+        self.sidebar: Optional[Sidebar] = None
         self._save_worker = None
         self._update_worker = None
-        self.focused_plot = (0, 0)  # Track focused plot coordinates
+        self.focused_plot: Tuple[int, int] = (0, 0)  # Track focused plot coordinates
 
     def compose(self) -> ComposeResult:
         """Create main layout."""
@@ -232,10 +239,10 @@ class FarmGame(App):
         if save_data:
             self.farm, self.player, offline_summary = save_data
 
-            # Show offline summary if significant (>5 min OR crops were harvested)
-            if offline_summary['offline_time'] > 300 or offline_summary['auto_harvested']:
+            # Show offline summary if significant
+            if offline_summary['offline_time'] > MIN_OFFLINE_TIME_FOR_MODAL or offline_summary['auto_harvested']:
                 await self._show_offline_summary(offline_summary)
-            elif offline_summary['offline_time'] > 60:
+            elif offline_summary['offline_time'] > MIN_OFFLINE_TIME_FOR_TOAST:
                 # Short offline time - just show a toast
                 minutes = int(offline_summary['offline_time'] // 60)
                 self.notify(f"🌙 Welcome back! You were away for {minutes}m", timeout=3)
@@ -255,7 +262,7 @@ class FarmGame(App):
         await self._refresh_ui()
 
         # Set initial focus to first plot (with small delay to ensure plots are ready)
-        self.set_timer(0.1, lambda: self._set_plot_focus(0, 0))
+        self.set_timer(PLOT_FOCUS_DELAY, lambda: self._set_plot_focus(0, 0))
 
         # Start background workers
         self._start_workers()
@@ -305,6 +312,25 @@ class FarmGame(App):
             self.focused_plot = (x, y)
             plot.focus()
 
+    def _restore_plot_focus(self, x: int, y: int) -> None:
+        """Restore focus to a plot after modal closes."""
+        self.set_timer(MODAL_CLOSE_DELAY, lambda: self._set_plot_focus(x, y))
+
+    async def _remove_modal_if_exists(self, modal_id: str) -> None:
+        """
+        Remove a modal if it exists.
+
+        Args:
+            modal_id: ID of the modal to remove
+        """
+        try:
+            existing = self.query_one(f"#{modal_id}")
+            await existing.remove()
+        except NoMatches:
+            pass  # Modal doesn't exist, continue
+        except Exception as e:
+            logger.error(f"Error removing modal {modal_id}: {e}")
+
     def action_focus_left(self) -> None:
         """Move focus left."""
         x, y = self.focused_plot
@@ -339,15 +365,19 @@ class FarmGame(App):
         try:
             selector = self.query_one("#seed-selector")
             selector.remove()
-        except:
-            pass
+        except NoMatches:
+            pass  # Modal not open, ignore
+        except Exception as e:
+            logger.error(f"Error closing seed selector: {e}")
 
         # Try to close offline summary if open
         try:
             summary = self.query_one("#offline-summary")
             summary.remove()
-        except:
-            pass
+        except NoMatches:
+            pass  # Modal not open, ignore
+        except Exception as e:
+            logger.error(f"Error closing offline summary: {e}")
 
     async def on_plot_clicked(self, message: PlotClicked) -> None:
         """Handle plot click."""
@@ -369,22 +399,16 @@ class FarmGame(App):
     async def _show_seed_selector(self, x: int, y: int) -> None:
         """Show seed selection modal."""
         # Remove existing selector if present
-        try:
-            existing = self.query_one("#seed-selector")
-            await existing.remove()
-        except:
-            pass
+        await self._remove_modal_if_exists("seed-selector")
 
-        def on_select(crop_type: str):
+        def on_select(crop_type: str) -> None:
             self.app.call_later(self._plant_crop, x, y, crop_type)
             selector.remove()
-            # Restore focus to the plot after closing modal
-            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
+            self._restore_plot_focus(x, y)
 
-        def on_cancel():
+        def on_cancel() -> None:
             selector.remove()
-            # Restore focus to the plot after closing modal
-            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
+            self._restore_plot_focus(x, y)
 
         selector = SeedSelector(self.player, on_select, on_cancel)
         await self.mount(selector)
@@ -457,17 +481,12 @@ class FarmGame(App):
     async def _show_offline_summary(self, summary: dict) -> None:
         """Show offline progression summary modal."""
         # Remove existing modal if present
-        try:
-            existing = self.query_one("#offline-summary")
-            await existing.remove()
-        except:
-            pass
+        await self._remove_modal_if_exists("offline-summary")
 
-        def on_close():
+        def on_close() -> None:
             modal.remove()
-            # Restore focus to the current plot
             x, y = self.focused_plot
-            self.set_timer(0.05, lambda: self._set_plot_focus(x, y))
+            self._restore_plot_focus(x, y)
 
         modal = OfflineSummary(summary, on_close)
         await self.mount(modal)
@@ -504,8 +523,39 @@ class FarmGame(App):
             SaveSystem.save_game(self.farm, self.player)
 
 
-def main():
+def setup_logging() -> None:
+    """Configure logging for the application."""
+    from config import SAVE_DIR
+    import os
+
+    # Ensure save directory exists for log files
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+
+    log_file = os.path.join(SAVE_DIR, 'farmgame.log')
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()  # Also log to console
+        ]
+    )
+
+    logger.info("Logging initialized")
+
+
+def main() -> None:
     """Entry point."""
+    setup_logging()
+
+    # Validate configuration before starting
+    from config import validate_config
+    if not validate_config():
+        logger.error("Configuration validation failed. Please fix config.py")
+        return
+
     app = FarmGame()
     app.run()
 

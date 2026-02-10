@@ -15,7 +15,7 @@ class PlotWidget(Static, can_focus=True):
 
     crop: reactive[Optional[Crop]] = reactive(None)
 
-    def __init__(self, x: int, y: int, **kwargs):
+    def __init__(self, x: int, y: int, **kwargs) -> None:
         """
         Initialize plot widget.
 

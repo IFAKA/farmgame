@@ -1,6 +1,6 @@
 """Farm state management."""
 
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, Tuple, List, Any
 from models.crop import Crop
 
 
@@ -123,7 +123,7 @@ class Farm:
         """Check if position is within farm bounds."""
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Serialize farm to dictionary for saving."""
         return {
             'width': self.width,
@@ -135,7 +135,7 @@ class Farm:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Farm':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Farm':
         """Deserialize farm from dictionary."""
         farm = cls(width=data['width'], height=data['height'])
 

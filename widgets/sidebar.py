@@ -43,23 +43,23 @@ class Sidebar(Container):
             f"[dim]Q - Quit[/dim]\n"
         )
 
-    def watch_coins(self, value: int) -> None:
+    def watch_coins(self, old_value: int, new_value: int) -> None:
         """Update display when coins change."""
         self._update_display()
 
-    def watch_level(self, value: int) -> None:
+    def watch_level(self, old_value: int, new_value: int) -> None:
         """Update display when level changes."""
         self._update_display()
 
-    def watch_experience(self, value: int) -> None:
+    def watch_experience(self, old_value: int, new_value: int) -> None:
         """Update display when XP changes."""
         self._update_display()
 
-    def watch_xp_for_next(self, value: int) -> None:
+    def watch_xp_for_next(self, old_value: int, new_value: int) -> None:
         """Update display when XP requirement changes."""
         self._update_display()
 
-    def watch_ready_count(self, value: int) -> None:
+    def watch_ready_count(self, old_value: int, new_value: int) -> None:
         """Update display when ready count changes."""
         self._update_display()
 

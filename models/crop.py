@@ -1,8 +1,7 @@
 """Crop system implementation."""
 
 from enum import Enum
-from typing import Optional
-from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
 import time
 
 from config import CROPS, STAGE_EMOJIS, CropConfig
@@ -21,20 +20,30 @@ class GrowthStage(Enum):
 class Crop:
     """Represents a single growing crop."""
 
-    def __init__(self, crop_type: str, planted_at: Optional[float] = None):
+    def __init__(self, crop_type: str, planted_at: Optional[float] = None) -> None:
         """
         Initialize a crop.
 
         Args:
             crop_type: Key from CROPS config (e.g., 'RADISH')
             planted_at: Unix timestamp when planted (defaults to now)
+
+        Raises:
+            ValueError: If crop_type is not in CROPS config
+            ValueError: If planted_at is negative
         """
         if crop_type not in CROPS:
             raise ValueError(f"Unknown crop type: {crop_type}")
 
         self.crop_type = crop_type
         self.config: CropConfig = CROPS[crop_type]
-        self.planted_at = planted_at if planted_at is not None else time.time()
+
+        # Validate planted_at timestamp
+        plant_time = planted_at if planted_at is not None else time.time()
+        if plant_time < 0:
+            raise ValueError(f"Invalid planted_at timestamp: {plant_time}")
+
+        self.planted_at = plant_time
 
     @property
     def growth_progress(self) -> float:
@@ -120,7 +129,7 @@ class Crop:
         filled = int(self.growth_progress * 8)
         return "█" * filled + "░" * (8 - filled)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Serialize crop to dictionary for saving."""
         return {
             'crop_type': self.crop_type,
@@ -128,7 +137,7 @@ class Crop:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Crop':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Crop':
         """Deserialize crop from dictionary."""
         return cls(
             crop_type=data['crop_type'],

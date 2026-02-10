@@ -3,14 +3,18 @@
 import json
 import os
 import time
+import logging
 from typing import Optional, Tuple, Dict, Any
 
 from config import (
     SAVE_DIR, SAVE_FILE, OFFLINE_REWARD_MULTIPLIER,
-    MAX_OFFLINE_TIME, STARTING_FARM_SIZE, CROPS
+    MAX_OFFLINE_TIME, STARTING_FARM_SIZE, CROPS,
+    MIN_OFFLINE_TIME_TO_PROCESS
 )
 from models.farm import Farm
 from models.player import Player
+
+logger = logging.getLogger(__name__)
 
 
 class SaveSystem:
@@ -46,9 +50,13 @@ class SaveSystem:
         try:
             with open(SAVE_FILE, 'w') as f:
                 json.dump(data, f, indent=2)
+            logger.info("Game saved successfully")
             return True
+        except (IOError, OSError) as e:
+            logger.error(f"Error saving game: {e}")
+            return False
         except Exception as e:
-            print(f"Error saving game: {e}")
+            logger.error(f"Unexpected error saving game: {e}")
             return False
 
     @staticmethod
@@ -71,6 +79,11 @@ class SaveSystem:
             with open(SAVE_FILE, 'r') as f:
                 data = json.load(f)
 
+            # Validate save file structure
+            if not all(key in data for key in ['version', 'last_save', 'farm', 'player']):
+                logger.error("Save file missing required fields")
+                return None
+
             farm = Farm.from_dict(data['farm'])
             player = Player.from_dict(data['player'])
             last_save = data['last_save']
@@ -80,10 +93,20 @@ class SaveSystem:
                 farm, player, last_save
             )
 
+            logger.info("Game loaded successfully")
             return farm, player, offline_summary
 
+        except json.JSONDecodeError as e:
+            logger.error(f"Corrupted save file (invalid JSON): {e}")
+            return None
+        except (IOError, OSError) as e:
+            logger.error(f"Error reading save file: {e}")
+            return None
+        except KeyError as e:
+            logger.error(f"Save file missing required field: {e}")
+            return None
         except Exception as e:
-            print(f"Error loading game: {e}")
+            logger.error(f"Unexpected error loading game: {e}")
             return None
 
     @staticmethod
@@ -105,7 +128,7 @@ class SaveSystem:
         """
         offline_time = min(time.time() - last_save, MAX_OFFLINE_TIME)
 
-        if offline_time < 10:  # Less than 10 seconds, ignore
+        if offline_time < MIN_OFFLINE_TIME_TO_PROCESS:
             return {
                 'offline_time': 0,
                 'auto_harvested': [],

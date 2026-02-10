@@ -2,7 +2,7 @@
 
 from textual.app import ComposeResult
 from textual.containers import Container, Grid
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 from widgets.plot import PlotWidget
 from models.farm import Farm
@@ -11,7 +11,7 @@ from models.farm import Farm
 class FarmGrid(Container):
     """Container for all farm plots in a grid layout."""
 
-    def __init__(self, farm: Farm, **kwargs):
+    def __init__(self, farm: Farm, **kwargs) -> None:
         """
         Initialize farm grid.
 
@@ -42,6 +42,6 @@ class FarmGrid(Container):
             plot.crop = crop
             plot.update_display()
 
-    def get_plot(self, x: int, y: int) -> PlotWidget:
+    def get_plot(self, x: int, y: int) -> Optional[PlotWidget]:
         """Get plot widget at coordinates."""
         return self.plots.get((x, y))

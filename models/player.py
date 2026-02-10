@@ -1,6 +1,6 @@
 """Player state and progression."""
 
-from typing import Set
+from typing import Set, Dict, Any, List, Optional
 from config import STARTING_COINS, STARTING_UNLOCKED_CROPS, XP_PER_LEVEL
 
 
@@ -14,8 +14,8 @@ class Player:
         level: int = 1,
         total_crops_planted: int = 0,
         total_crops_harvested: int = 0,
-        unlocked_crops: Set[str] = None
-    ):
+        unlocked_crops: Optional[Set[str]] = None
+    ) -> None:
         """Initialize player state."""
         self.coins = coins
         self.experience = experience
@@ -81,7 +81,7 @@ class Player:
         """Check if player has unlocked a crop."""
         return crop_type in self.unlocked_crops
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Serialize player to dictionary for saving."""
         return {
             'coins': self.coins,
@@ -93,7 +93,7 @@ class Player:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Player':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Player':
         """Deserialize player from dictionary."""
         return cls(
             coins=data['coins'],
