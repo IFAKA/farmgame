@@ -146,3 +146,11 @@ MIT
 ## Credits
 
 Made for casual farming fun! 🌱✨
+
+---
+
+## Support
+
+If this project is useful to you, you can support my work:
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zfaka)
